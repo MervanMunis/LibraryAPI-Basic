@@ -21,9 +21,6 @@ The ASP.NET Core Identity framework is used to manage users, passwords, roles, a
 ### JWT (JSON Web Tokens)
 JWT is used for securely transmitting information between parties as a JSON object. It is used for authentication and authorization in the LibraryAPI project.
 
-### Docker
-Docker is a platform for developing, shipping, and running applications in containers. The LibraryAPI project is containerized using Docker to ensure consistency across different environments and ease of deployment.
-
 ### SQL Server
 SQL Server is a relational database management system developed by Microsoft. It is used as the database for the LibraryAPI project to store all the library data.
 
@@ -36,15 +33,17 @@ The project is organized into several folders and files to maintain a clean and 
 LibraryAPI/ <br>
 ├── Auth/ <br>
 ├── Controllers/ <br>
-├── DTOs/ <br>
 ├── Data/ <br>
-├── Entities/ <br>
+├── Models/ <br>
+├ ├── Entities <br>
+├ ├── DTOs      <br>
+├ ├── Enums     <br>
 ├── Exceptions/ <br>
 ├── Migrations/ <br>
 ├── Services/ <br>
 ├── LibraryAPI/ <br>
-│ ├── AuthorImages/ <br>
-│ ├── BookImages/ <br>
+├ ├── AuthorImages/ <br>
+├ ├── BookImages/ <br>
 
 ### Key Folders and Files
 - **Auth/**: Contains authentication-related files.
@@ -228,25 +227,6 @@ The LibraryAPI provides various endpoints for managing library resources. Here i
 
 ## Testing the Project
 To test the project, follow these steps:
-
-### Pull the Docker Image
-
-```sh
-docker pull mervanmunis/libraryapi
-```
-
-### Run the Docker Compose
-
-```sh
-docker-compose up
-```
-
-### Access the Swagger UI
-
-Open your browser and navigate to 
-```sh 
-http://localhost:5000/swagger
-```
 
 ### Authentication and Authorization
 
@@ -434,29 +414,6 @@ http://localhost:5000/swagger
 Not: 
   * PenaltyType Values: None, BookTenDays, BookTwoMonths, BookOneYear, BookLimitless, LibraryTenDays, LibraryTwoMonths, LibraryOneYear, LibraryLimitless
 
-
-## Docker Configuration
-
-### Dockerfile
-The Dockerfile is used to build a Docker image for the LibraryAPI project. It specifies the base image, copies the necessary files, restores dependencies, builds the project, and sets the entry point for the application.
-
-### docker-compose.yml
-The docker-compose.yml file is used to define and run multi-container Docker applications. It specifies the services, networks, and volumes needed to run the LibraryAPI project and the SQL Server database.
-
-## Running the Dockerized Project
-
-1. Pull the Docker Image:
-
-```sh
-docker pull mervanmunis/libraryapi
-```
-
-2. Run the Docker Compose:
-
-```sh
-docker-compose up
-```
-
 ## Running the Non-Dockerized Version
 
 To run the non-dockerized version of the project, follow these steps:
@@ -484,7 +441,7 @@ dotnet ef database update
 
 ## Conclusion
 
-The LibraryAPI project provides a robust and scalable solution for managing library resources. With its comprehensive set of features, modern technology stack, and detailed documentation, it is well-suited for deployment in real-world library environments. The use of Docker ensures easy deployment and consistency across different environments.
+The LibraryAPI project provides a robust and scalable solution for managing library resources. With its comprehensive set of features, modern technology stack, and detailed documentation, it is well-suited for real-world library environments.
 
 ## Acknowledgements
 This project was developed as part of the backend program at [Softito Yazılım - Bilişim Akademisi](https://softito.com.tr/index.php). Special thanks to the instructors and peers who provided valuable feedback and support throughout the development process.
