@@ -28,7 +28,7 @@ SQL Server is a relational database management system developed by Microsoft. It
 Swagger is an open-source tool for documenting APIs. It provides a user-friendly interface to explore and test API endpoints. The LibraryAPI project includes Swagger for API documentation and testing.
 
 ### Note: 
-   * You can find the non-dockerized project from [LibraryAPI-Dockerized](https://github.com/MervanMunis/LibraryAPI-Dockerized.git)
+   * You can find the dockerized project from [LibraryAPI-Dockerized](https://github.com/MervanMunis/LibraryAPI-Dockerized.git)
 
 ## Project Structure
 The project is organized into several folders and files to maintain a clean and manageable structure. Here is an overview of the project structure:
