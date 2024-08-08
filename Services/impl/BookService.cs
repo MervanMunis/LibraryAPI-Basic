@@ -218,6 +218,14 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<bool>.FailureResult("Book not found");
             }
 
+            if (book.ISBN != bookRequest.ISBN)
+            {
+                if (await _context.Books!.AnyAsync(b => b.ISBN == bookRequest.ISBN))
+                {
+                    return ServiceResult<bool>.FailureResult("The book already exist!");
+                }
+            }
+
             book.ISBN = bookRequest.ISBN;
             book.Title = bookRequest.Title;
             book.PageCount = bookRequest.PageCount;
