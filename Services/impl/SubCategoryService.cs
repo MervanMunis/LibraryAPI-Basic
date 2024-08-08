@@ -66,6 +66,11 @@ namespace LibraryAPI.Services.impl
         /// <param name="subCategoryRequest">The details of the subcategory to add.</param>
         public async Task<ServiceResult<string>> AddSubCategoryAsync(SubCategoryRequest subCategoryRequest)
         {
+            if (await _context.SubCategories!.AnyAsync(s => s.Name ==  subCategoryRequest.Name))
+            {
+                return ServiceResult<string>.FailureResult("The subcategory name already exists!");
+            }
+
             SubCategory subCategory = new SubCategory()
             {
                 Name = subCategoryRequest.Name,
@@ -87,6 +92,11 @@ namespace LibraryAPI.Services.impl
             if (existingSubCategory == null)
             {
                 return ServiceResult<bool>.FailureResult("SubCategory not found");
+            }
+
+            if (await _context.SubCategories!.AnyAsync(s => s.Name == subCategoryRequest.Name))
+            {
+                return ServiceResult<bool>.FailureResult("The subcategory name already exists!");
             }
 
             existingSubCategory.Name = subCategoryRequest.Name;

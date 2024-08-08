@@ -69,6 +69,11 @@ namespace LibraryAPI.Services.impl
         /// <returns>A service result indicating success or failure.</returns>
         public async Task<ServiceResult<string>> AddDepartmentAsync(DepartmentRequest departmentRequest)
         {
+            if (await _context.Departments!.AnyAsync(dn => dn.Name == departmentRequest.Name))
+            {
+                return ServiceResult<string>.FailureResult("The department name already exists!");
+            }
+
             var department = new Department
             {
                 Name = departmentRequest.Name
@@ -94,7 +99,13 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<bool>.FailureResult("Department not found");
             }
 
+            if (await _context.Departments!.AnyAsync(dn => dn.Name == departmentRequest.Name))
+            {
+                return ServiceResult<bool>.FailureResult("The department name already exists!");
+            }
+
             department.Name = departmentRequest.Name;
+
             _context.Update(department).State = EntityState.Modified;
 
             try

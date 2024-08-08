@@ -109,6 +109,11 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<bool>.FailureResult("Category not found");
             }
 
+            if (await _context.Categories!.AnyAsync(c => c.Name == categoryRequest.Name))
+            {
+                return ServiceResult<bool>.FailureResult("The category name already exists!");
+            }
+
             existingCategory.Name = categoryRequest.Name;
             _context.Update(existingCategory).State = EntityState.Modified;
 

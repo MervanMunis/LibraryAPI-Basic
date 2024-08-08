@@ -149,6 +149,9 @@ namespace LibraryAPI
             // Apply migrations at startup
             using (var scope = app.Services.CreateScope())
             {
+                var dbContext = scope.ServiceProvider.GetRequiredService<LibraryAPIContext>();
+                dbContext.Database.Migrate();
+
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 RoleInitializer.InitializeAsync(userManager, roleManager).Wait();
