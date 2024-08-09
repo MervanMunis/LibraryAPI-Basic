@@ -25,7 +25,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of member responses.</returns>
         [HttpGet] // GET: api/Members
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<MemberResponse>>> GetMembers()
         {
             var result = await _memberService.GetAllMembersAsync();
@@ -43,11 +43,13 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <param name="id">The ID of the member.</param>
         /// <returns>The member details.</returns>
-        [HttpGet("{id}")] // GET: api/Members/5
-        [Authorize(Roles = "Librarian")]
-        public async Task<ActionResult<MemberResponse>> GetMember(string id)
+        [HttpGet("memberById")] // GET: api/Members/5
+        [Authorize(Roles = "Member")]
+        public async Task<ActionResult<MemberResponse>> GetMember()
         {
-            var result = await _memberService.GetMemberByIdNumberAsync(id);
+            var memberId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _memberService.GetMemberByIdAsync(memberId);
 
             if (!result.Success)
             {
@@ -63,7 +65,7 @@ namespace LibraryAPI.Controllers
         /// <param name="idNumber">The ID number of the member.</param>
         /// <returns>The member details.</returns>
         [HttpGet("{idNumber}")] // GET: api/Members/{IdNumber}
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<MemberResponse>> GetMemberByIdNumber(string idNumber)
         {
             var result = await _memberService.GetMemberByIdNumberAsync(idNumber);
@@ -82,6 +84,7 @@ namespace LibraryAPI.Controllers
         /// <param name="memberRequest">The member details.</param>
         /// <returns>A success message if the member is created successfully.</returns>
         [HttpPost] // POST: api/Members
+        [AllowAnonymous]
         public async Task<ActionResult<string>> PostMember([FromBody] MemberRequest memberRequest)
         {
             var result = await _memberService.AddMemberAsync(memberRequest);

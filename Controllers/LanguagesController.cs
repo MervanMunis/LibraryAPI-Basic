@@ -23,7 +23,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of active languages.</returns>
         [HttpGet] // GET: api/Languages
-        [Authorize(Roles = "Member,Librarian")]
+        [Authorize(Roles = "Member,Librarian, HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<LanguageResponse>>> GetLanguages()
         {
             var result = await _languageService.GetAllLanguagesAsync();
@@ -42,7 +42,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the language.</param>
         /// <returns>The language details.</returns>
         [HttpGet("{id}")] // GET: api/Languages/5
-        [Authorize(Roles = "Member,Librarian")]
+        [Authorize(Roles = "Member,Librarian, HeadOfLibrary")]
         public async Task<ActionResult<LanguageResponse>> GetLanguage(short id)
         {
             var result = await _languageService.GetLanguageByIdAsync(id);
@@ -61,7 +61,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the language.</param>
         /// <returns>A list of books associated with the language.</returns>
         [HttpGet("{id}/books")] // GET: api/Languages/5/books
-        [Authorize(Roles = "Member,Librarian")]
+        [Authorize(Roles = "Member,Librarian, HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByLanguage(short id)
         {
             var result = await _languageService.GetBooksByLanguageIdAsync(id);
@@ -80,7 +80,7 @@ namespace LibraryAPI.Controllers
         /// <param name="languageRequest">The language details.</param>
         /// <returns>A success message if the language is created successfully.</returns>
         [HttpPost] // POST: api/Languages
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Member,Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> PostLanguage([FromBody] LanguageRequest languageRequest)
         {
             var result = await _languageService.AddLanguageAsync(languageRequest);
@@ -100,7 +100,7 @@ namespace LibraryAPI.Controllers
         /// <param name="languageRequest">The updated language details.</param>
         /// <returns>A success message if the language is updated successfully.</returns>
         [HttpPut("{id}")] // PUT: api/Languages/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> PutLanguage(short id, [FromBody] LanguageRequest languageRequest)
         {
             var result = await _languageService.UpdateLanguageAsync(id, languageRequest);
@@ -119,7 +119,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the language.</param>
         /// <returns>A success message if the language is set to active status.</returns>
         [HttpPatch("{id}/status/active")] // PATCH: api/Languages/5/status/active
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> SetLanguageActiveStatus(short id)
         {
             var result = await _languageService.SetLanguageStatusAsync(id, Status.Active.ToString());
@@ -136,7 +136,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the language.</param>
         /// <returns>A success message if the language is set to inactive status.</returns>
         [HttpPatch("{id}/status/InActive")] // PATCH: api/Languages/5/status/InActive
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> InActiveLanguage(short id)
         {
             var result = await _languageService.SetLanguageStatusAsync(id, Status.InActive.ToString());

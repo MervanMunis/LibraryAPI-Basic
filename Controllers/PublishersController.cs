@@ -24,7 +24,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of publishers.</returns>
         [HttpGet] // GET: api/Publishers
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<PublisherResponse>>> GetPublishers()
         {
             var result = await _publisherService.GetAllPublishersAsync();
@@ -43,7 +43,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the publisher.</param>
         /// <returns>The details of the publisher.</returns>
         [HttpGet("{id}")] // GET: api/Publishers/5
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<PublisherResponse>> GetPublisher(long id)
         {
             var result = await _publisherService.GetPublisherByIdAsync(id);
@@ -63,7 +63,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the publisher.</param>
         /// <returns>A list of books published by the specified publisher.</returns>
         [HttpGet("{id}/books")] // GET: api/Publishers/5/books
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<CategoryBookResponse>>> GetBooksByPublisher(long id)
         {
             var result = await _publisherService.GetBooksByPublisherIdAsync(id);
@@ -82,7 +82,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the publisher.</param>
         /// <returns>The address details of the specified publisher.</returns>
         [HttpGet("{id}/address")] // GET: api/Publishers/5/address
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<PublisherAddress>> GetPublisherAddress(long id)
         {
             var result = await _publisherService.GetPublisherAddressAsync(id);
@@ -102,7 +102,7 @@ namespace LibraryAPI.Controllers
         /// <param name="publisherRequest">The details of the publisher to be added.</param>
         /// <returns>A success message if the publisher is added successfully.</returns>
         [HttpPost] // POST: api/Publishers
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> PostPublisher([FromBody] PublisherRequest publisherRequest)
         {
             var result = await _publisherService.AddPublisherAsync(publisherRequest);
@@ -123,7 +123,7 @@ namespace LibraryAPI.Controllers
         /// <param name="publisherRequest">The new details of the publisher.</param>
         /// <returns>A success message if the publisher is updated successfully.</returns>
         [HttpPut("{id}")] // PUT: api/Publishers/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> PutPublisher(long id, [FromBody] PublisherRequest publisherRequest)
         {
             var result = await _publisherService.UpdatePublisherAsync(id, publisherRequest);
@@ -142,7 +142,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the publisher whose status is to be set to active.</param>
         /// <returns>A success message if the publisher is set to active status.</returns>
         [HttpPatch("{id}/status/active")] // PATCH: api/Publishers/5/status/active
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> ActivePublisher(long id)
         {
             var result = await _publisherService.SetPublisherStatusAsync(id, Status.Active.ToString());
@@ -161,7 +161,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the publisher whose status is to be set to inactive.</param>
         /// <returns>A success message if the publisher is set to inactive status.</returns>
         [HttpPatch("{id}/status/InActive")] // PATCH: api/Publishers/5/status/InActive
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> InActivePublisher(long id)
         {
             var result = await _publisherService.SetPublisherStatusAsync(id, Status.InActive.ToString());
@@ -182,7 +182,7 @@ namespace LibraryAPI.Controllers
         /// <param name="address">The new address details of the publisher.</param>
         /// <returns>A success message if the address is added or updated successfully.</returns>
         [HttpPut("{id}/address")] // PUT: api/Publishers/5/address
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> AddOrUpdatePublisherAddress(long id, [FromBody] PublisherAddressRequest address)
         {
             var result = await _publisherService.AddOrUpdatePublisherAddressAsync(id, address);

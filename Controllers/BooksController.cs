@@ -22,7 +22,7 @@ public class BooksController : ControllerBase
     /// Retrieves all books.
     /// </summary>
     [HttpGet] // GET: api/Books
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooks()
     {
         var result = await _bookService.GetAllBooksAsync();
@@ -40,7 +40,7 @@ public class BooksController : ControllerBase
     /// </summary>
     /// <returns>A service result containing a list of active books.</returns>
     [HttpGet("active")] // GET: api/Books/active
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<ServiceResult<IEnumerable<BookResponse>>>> GetAllActiveBooks()
     {
         var result = await _bookService.GetAllActiveBooksAsync();
@@ -58,7 +58,7 @@ public class BooksController : ControllerBase
     /// </summary>
     /// <returns>A service result containing a list of inactive books.</returns>
     [HttpGet("inactive")] // GET: api/Books/inactive
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<ServiceResult<IEnumerable<BookResponse>>>> GetAllInActiveBooks()
     {
         var result = await _bookService.GetAllInActiveBooksAsync();
@@ -76,7 +76,7 @@ public class BooksController : ControllerBase
     /// </summary>
     /// <returns>A service result containing a list of banned books.</returns>
     [HttpGet("banned")] // GET: api/Books/banned
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<ServiceResult<IEnumerable<BookResponse>>>> GetAllBannedBooks()
     {
         var result = await _bookService.GetAllBannedBooksAsync();
@@ -94,7 +94,7 @@ public class BooksController : ControllerBase
     /// </summary>
     /// <returns>A service result containing a list of borrowed books.</returns>
     [HttpGet("bookCopy/active")] // GET: api/Books/bookCopy/active
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<ServiceResult<IEnumerable<BookResponse>>>> GetAllActiveBookCopies()
     {
         var result = await _bookService.GetAllActiveBookCopiesAsync();
@@ -112,7 +112,7 @@ public class BooksController : ControllerBase
     /// </summary>
     /// <returns>A service result containing a list of borrowed books.</returns>
     [HttpGet("bookCopy/inactive")] // GET: api/Books/bookCopy/inactive
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<ServiceResult<IEnumerable<BookResponse>>>> GetAllInActiveBookCopies()
     {
         var result = await _bookService.GetAllInActiveBookCopiesAsync();
@@ -130,7 +130,7 @@ public class BooksController : ControllerBase
     /// </summary>
     /// <returns>A service result containing a list of borrowed books.</returns>
     [HttpGet("bookCopy/borrowed")] // GET: api/Books/bookCopy/borrowed
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<ServiceResult<IEnumerable<BookResponse>>>> GetAllBorrowedBookCopies()
     {
         var result = await _bookService.GetAllBorrowedBookCopiesAsync();
@@ -149,7 +149,7 @@ public class BooksController : ControllerBase
     /// <param name="id">The ID of the book to retrieve.</param>
     /// <returns>The details of the book.</returns>
     [HttpGet("{id}")] // GET: api/Books/5
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<ActionResult<BookResponse>> GetBook(long id)
     {
         var result = await _bookService.GetBookByIdAsync(id);
@@ -169,7 +169,7 @@ public class BooksController : ControllerBase
     /// <param name="bookRequest">The request body containing details of the book to add.</param>
     /// <returns>Confirmation message upon successful addition.</returns>
     [HttpPost] // POST: api/Books
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
     public async Task<ActionResult<string>> PostBook([FromBody] BookRequest bookRequest)
     {
         var result = await _bookService.AddBookAsync(bookRequest);
@@ -189,7 +189,7 @@ public class BooksController : ControllerBase
     /// <param name="bookRequest">The request body containing updated details of the book.</param>
     /// <returns>Confirmation message upon successful update.</returns>
     [HttpPut("{id}")] // PUT: api/Books/5
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
     public async Task<ActionResult<string>> PutBook(long id, [FromBody] BookRequest bookRequest)
     {
         var result = await _bookService.UpdateBookAsync(id, bookRequest);
@@ -208,7 +208,7 @@ public class BooksController : ControllerBase
     /// <param name="id">The ID of the book to update.</param>
     /// <returns>Confirmation message upon successful status change.</returns>
     [HttpPatch("{id}/InActive")] // PATCH: api/Books/5/InActive
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
     public async Task<ActionResult<string>> InActiveBook(long id)
     {
         var result = await _bookService.SetBookStatusAsync(id, Status.InActive.ToString());
@@ -227,7 +227,7 @@ public class BooksController : ControllerBase
     /// <param name="id">The ID of the book to update.</param>
     /// <returns>Confirmation message upon successful status change.</returns>
     [HttpPatch("{id}/Active")] // PATCH: api/Books/5/Active
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
     public async Task<ActionResult<string>> ActiveBook(long id)
     {
         var result = await _bookService.SetBookStatusAsync(id, Status.Active.ToString());
@@ -246,7 +246,7 @@ public class BooksController : ControllerBase
     /// <param name="id">The ID of the book to update.</param>
     /// <returns>Confirmation message upon successful status change.</returns>
     [HttpPatch("{id}/Banned")] // PATCH: api/Books/5/Banned
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
     public async Task<IActionResult> BannedBook(long id)
     {
         var result = await _bookService.SetBookStatusAsync(id, Status.Banned.ToString());
@@ -266,7 +266,7 @@ public class BooksController : ControllerBase
     /// <param name="coverImage">The new cover image file.</param>
     /// <returns>Confirmation message upon successful update.</returns>
     [HttpPatch("{id}/image")] // PATCH: api/Books/5/image
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
     public async Task<ActionResult<string>> UpdateBookImage(long id, IFormFile coverImage)
     {
         if (coverImage == null)
@@ -290,7 +290,7 @@ public class BooksController : ControllerBase
     /// <param name="bookId">The ID of the book.</param>
     /// <returns>The image as a byte array.</returns>
     [HttpGet("{bookId}/image")]
-    [Authorize(Roles = "Member, Librarian")]
+    [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
     public async Task<IActionResult> GetBookImage(long bookId)
     {
         var result = await _bookService.GetBookImageAsync(bookId);
@@ -332,7 +332,7 @@ public class BooksController : ControllerBase
     /// <param name="change">The number of copies to add or remove.</param>
     /// <returns>Confirmation message upon successful update.</returns>
     [HttpPut("{id}/copies")] // PUT: api/Books/5/copies
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
     public async Task<ActionResult<string>> UpdateBookCopies(long id, [FromBody] short change)
     {
         var result = await _bookService.UpdateBookCopiesAsync(id, change);

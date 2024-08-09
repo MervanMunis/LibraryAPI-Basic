@@ -24,7 +24,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of active locations.</returns>
         [HttpGet] // GET: api/Locations
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<LocationResponse>>> GetLocations()
         {
             var result = await _locationService.GetAllLocationsAsync();
@@ -43,7 +43,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the location.</param>
         /// <returns>The location details.</returns>
         [HttpGet("{id}")] // GET: api/Locations/5
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<LocationResponse>> GetLocation(int id)
         {
             var result = await _locationService.GetLocationByIdAsync(id);
@@ -63,7 +63,7 @@ namespace LibraryAPI.Controllers
         /// <param name="locationRequest">The location details.</param>
         /// <returns>A success message if the location is created successfully.</returns>
         [HttpPost] // POST: api/Locations
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> PostLocation([FromBody] LocationRequest locationRequest)
         {
             var result = await _locationService.AddLocationAsync(locationRequest);
@@ -83,7 +83,7 @@ namespace LibraryAPI.Controllers
         /// <param name="locationRequest">The location update details.</param>
         /// <returns>A success message if the location is updated successfully.</returns>
         [HttpPut("{id}")] // PUT: api/Locations/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> PutLocation(int id, [FromBody] LocationRequest locationRequest)
         {
             var result = await _locationService.UpdateLocationAsync(id, locationRequest);
@@ -102,7 +102,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the location.</param>
         /// <returns>A success message if the location is set to inactive successfully.</returns>
         [HttpPatch("{id}/status/inactive")] // PATCH: api/Locations/5/status
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> InActiveLocation(int id)
         {
             var result = await _locationService.SetLocationStatusAsync(id, Status.InActive);
@@ -121,7 +121,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the location.</param>
         /// <returns>A success message if the location is set to active successfully.</returns>
         [HttpPatch("{id}/status/active")] // PATCH: api/Locations/5/status/active
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> ActiveLocation(int id)
         {
             var result = await _locationService.SetLocationStatusAsync(id, Status.Active);
@@ -141,7 +141,7 @@ namespace LibraryAPI.Controllers
         /// <param name="sectionCode">The section code to filter by.</param>
         /// <returns>A list of books in the specified section code.</returns>
         [HttpGet("section/{sectionCode}")] // GET: api/Locations/section/{sectionCode}
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooksBySectionCode(string sectionCode)
         {
             var result = await _locationService.GetBooksBySectionCodeAsync(sectionCode);
@@ -160,7 +160,7 @@ namespace LibraryAPI.Controllers
         /// <param name="aisleCode">The aisle code to filter by.</param>
         /// <returns>A list of books in the specified aisle code.</returns>
         [HttpGet("aisle/{aisleCode}")] // GET: api/Locations/aisle/{aisleCode}
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooksByAisleCode(string aisleCode)
         {
             var result = await _locationService.GetBooksByAisleCodeAsync(aisleCode);
@@ -180,7 +180,7 @@ namespace LibraryAPI.Controllers
         /// <param name="shelfNumber">The shelf number to filter by.</param>
         /// <returns>A list of books in the specified shelf number.</returns>
         [HttpGet("shelf/{shelfNumber}")] // GET: api/Locations/shelf/{shelfNumber}
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooksByShelfNumber(string shelfNumber)
         {
             var result = await _locationService.GetBooksByShelfNumberAsync(shelfNumber);

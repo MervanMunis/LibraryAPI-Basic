@@ -48,11 +48,11 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <param name="id">The ID of the penalty.</param>
         /// <returns>The details of the penalty.</returns>
-        [HttpGet("{id}")] // GET: api/Penalties/5
+        [HttpGet("/memberPenalties")] // GET: api/Penalties/5
         [Authorize(Roles = "Librarian")]
-        public async Task<ActionResult<PenaltyResponse>> GetPenalty(long id)
+        public async Task<ActionResult<PenaltyResponse>> GetPenalty(string memberIdNumber)
         {
-            var result = await _penaltyService.GetPenaltyByIdAsync(id);
+            var result = await _penaltyService.GetPenaltyByIdAsync(memberIdNumber);
 
             if (!result.Success)
             {

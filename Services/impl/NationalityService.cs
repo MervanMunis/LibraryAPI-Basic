@@ -96,6 +96,11 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<bool>.FailureResult("Nationality not found");
             }
 
+            if (await _context.Nationalities!.AnyAsync(n => n.Name == nationalityRequest.Name || n.NationalityCode == nationalityRequest.NationalityCode))
+            {
+                return ServiceResult<bool>.FailureResult("Nationality with the specified name or code already exists");
+            }
+
             existingNationality.Name = nationalityRequest.Name;
             existingNationality.NationalityCode = nationalityRequest.NationalityCode;
 

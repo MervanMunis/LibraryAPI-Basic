@@ -23,7 +23,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of nationality responses.</returns>
         [HttpGet] // GET: api/Nationalities
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<NationalityResponse>>> GetNationalities()
         {
             var result = await _nationalityService.GetAllNationalitiesAsync();
@@ -42,7 +42,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the nationality.</param>
         /// <returns>The nationality details.</returns>
         [HttpGet("{id}")] // GET: api/Nationalities/5
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<NationalityResponse>> GetNationality(short id)
         {
             var result = await _nationalityService.GetNationalityByIdAsync(id);
@@ -61,7 +61,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the nationality.</param>
         /// <returns>A list of authors associated with the specified nationality.</returns>
         [HttpGet("{id}/authors")] // GET: api/Nationalities/5/authors
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<AuthorResoponse>>> GetAuthorsByNationalityId(short id)
         {
             var result = await _nationalityService.GetAuthorsByNationalityIdAsync(id);
@@ -80,7 +80,7 @@ namespace LibraryAPI.Controllers
         /// <param name="nationalityRequest">The nationality details.</param>
         /// <returns>A success message if the nationality is created successfully.</returns>
         [HttpPost] // POST: api/Nationalities
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> PostNationality([FromBody] NationalityRequest nationalityRequest)
         {
             var result = await _nationalityService.AddNationalityAsync(nationalityRequest);
@@ -100,7 +100,7 @@ namespace LibraryAPI.Controllers
         /// <param name="nationalityRequest">The updated nationality details.</param>
         /// <returns>A success message if the nationality is updated successfully.</returns>
         [HttpPut("{id}")] // PUT: api/Nationalities/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> PutNationality(short id, [FromBody] NationalityRequest nationalityRequest)
         {
             var result = await _nationalityService.UpdateNationalityAsync(id, nationalityRequest);
@@ -119,7 +119,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the nationality to delete.</param>
         /// <returns>A success message if the nationality is deleted successfully.</returns>
         [HttpDelete("{id}")] // DELETE: api/Nationalities/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> DeleteNationality(short id)
         {
             var result = await _nationalityService.DeleteNationalityAsync(id);

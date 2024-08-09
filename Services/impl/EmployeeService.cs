@@ -95,6 +95,11 @@ namespace LibraryAPI.Services.impl
         /// <returns>A success message if the employee is created successfully.</returns>
         public async Task<ServiceResult<string>> AddEmployeeAsync(EmployeeRequest employeeRequest)
         {
+            if (await _context.Departments!.AnyAsync(d => d.DepartmentId != employeeRequest.DepartmentId))
+            {
+                return ServiceResult<string>.FailureResult("The department does not exist.");
+            }
+
             // Check if a user with the provided email already exists
             var existingUser = await _userManager.FindByEmailAsync(employeeRequest.Email);
             if (existingUser != null)
@@ -102,11 +107,9 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<string>.FailureResult("A user with this email already exists.");
             }
 
-            var department = _context.Departments!.FirstOrDefaultAsync(d => d.DepartmentId == employeeRequest.DepartmentId);
-
-            if (department == null)
+            if (await _context.Employees!.Include(a => a.ApplicationUser).AnyAsync(e => e.ApplicationUser!.IdNumber == employeeRequest.IdNumber))
             {
-                return ServiceResult<string>.FailureResult("The department does not exist.");
+                return ServiceResult<string>.FailureResult("A user with this ıdNumber already exists.");
             }
 
             // Create a new ApplicationUser object
@@ -167,6 +170,16 @@ namespace LibraryAPI.Services.impl
             if (employee == null)
             {
                 return ServiceResult<bool>.FailureResult("Employee not found");
+            }
+
+            if (await _context.Employees!.Include(a => a.ApplicationUser).AnyAsync(e => e.ApplicationUser!.IdNumber == employeeRequest.IdNumber))
+            {
+                return ServiceResult<bool>.FailureResult("A user with this ıdNumber already exists.");
+            }
+
+            if (await _context.Departments!.AnyAsync(d => d.DepartmentId == employeeRequest.DepartmentId))
+            {
+                return ServiceResult<bool>.FailureResult("The department does not exist.");
             }
 
             // Find the user by ID

@@ -5,12 +5,12 @@ using LibraryAPI.Models.Enums;
 using LibraryAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LibraryAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "HeadOfLibrary")]
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
@@ -25,6 +25,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of employee responses.</returns>
         [HttpGet] // GET: /api/Employees
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<EmployeeResponse>>> GetEmployees()
         {
             var result = await _employeeService.GetAllEmployeesAsync();
@@ -43,6 +44,7 @@ namespace LibraryAPI.Controllers
         /// <param name="idNumber">The ID number of the employee.</param>
         /// <returns>An employee response if found, otherwise an error message.</returns>
         [HttpGet("{idNumber}")] // GET: /api/Employees/TC numarası
+        [Authorize(Roles = " Librarian, HeadOfLibrary")]
         public async Task<ActionResult<EmployeeResponse>> GetEmployee(string idNumber)
         {
             var result = await _employeeService.GetEmployeeByIdNumberAsync(idNumber);
@@ -61,6 +63,7 @@ namespace LibraryAPI.Controllers
         /// <param name="employeeRequest">The employee request data.</param>
         /// <returns>A success message if the employee is created successfully.</returns>
         [HttpPost] // POST: /api/Employees
+        [Authorize(Roles = "HeadOfLibrary")]
         public async Task<ActionResult<string>> PostEmployee([FromBody] EmployeeRequest employeeRequest)
         {
             var result = await _employeeService.AddEmployeeAsync(employeeRequest);
@@ -80,6 +83,7 @@ namespace LibraryAPI.Controllers
         /// <param name="employeeRequest">The updated employee request data.</param>
         /// <returns>A success message if the employee is updated successfully.</returns>
         [HttpPut("{id}")] // PUT: /api/Employees/2
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> PutEmployee(string id, [FromBody] EmployeeRequest employeeRequest)
         {
             var result = await _employeeService.UpdateEmployeeAsync(id, employeeRequest);
@@ -98,6 +102,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the employee whose status is to be updated.</param>
         /// <returns>A success message if the employee's status is updated successfully.</returns>
         [HttpPatch("{id}/status/active")] // PATCH: /api/Employees/3/status/active
+        [Authorize(Roles = "HeadOfLibrary")]
         public async Task<ActionResult<string>> SetEmployeeActiveStatus(string id)
         {
             var result = await _employeeService.SetEmployeeStatusAsync(id, EmployeeStatus.Working.ToString());
@@ -116,6 +121,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the employee whose status is to be updated.</param>
         /// <returns>A success message if the employee's status is updated successfully.</returns>
         [HttpPatch("{id}/status/quit")] // PATCH: /api/Employees/3/status/quit
+        [Authorize(Roles = "HeadOfLibrary")]
         public async Task<ActionResult<string>> SetEmployeeQuitStatus(string id)
         {
             var result = await _employeeService.SetEmployeeStatusAsync(id, EmployeeStatus.Quit.ToString());
@@ -134,11 +140,13 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the employee whose password is to be updated.</param>
         /// <param name="updatePasswordDTO">The current and new password data.</param>
         /// <returns>A success message if the password is updated successfully.</returns>
-        [HttpPatch("{id}/password")] // PATCH: /api/Employees/3/password
+        [HttpPatch("/password")] // PATCH: /api/Employees/3/password
         [Authorize(Roles = "Librarian")]
-        public async Task<ActionResult<string>> UpdateEmployeePassword(string id, [FromBody] UpdatePasswordRequest updatePasswordDTO)
+        public async Task<ActionResult<string>> UpdateEmployeePassword([FromBody] UpdatePasswordRequest updatePasswordDTO)
         {
-            var result = await _employeeService.UpdateEmployeePasswordAsync(id, updatePasswordDTO.CurrentPassword, updatePasswordDTO.NewPassword);
+            var employeeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _employeeService.UpdateEmployeePasswordAsync(employeeId, updatePasswordDTO.CurrentPassword, updatePasswordDTO.NewPassword);
 
             if (!result.Success)
             {
@@ -154,11 +162,13 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the employee.</param>
         /// <param name="employeeAddress">The employee address data.</param>
         /// <returns>A success message if the address is added successfully.</returns>
-        [HttpPost("{id}/address")] // POST: /api/Employees/3/address
+        [HttpPost("/address")] // POST: /api/Employees/3/address
         [Authorize(Roles = "Librarian")]
-        public async Task<ActionResult<string>> PostEmployeeAddress(string id, [FromBody] EmployeeAddress employeeAddress)
+        public async Task<ActionResult<string>> PostEmployeeAddress([FromBody] EmployeeAddress employeeAddress)
         {
-            employeeAddress.EmployeeId = id;
+            var employeeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            employeeAddress.EmployeeId = employeeId;
 
             var result = await _employeeService.AddEmployeeAddressAsync(employeeAddress);
 

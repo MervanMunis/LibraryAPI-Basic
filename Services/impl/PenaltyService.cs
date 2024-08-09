@@ -47,29 +47,31 @@ namespace LibraryAPI.Services.impl
         /// </summary>
         /// <param name="id">The ID of the penalty.</param>
         /// <returns>The penalty details.</returns>
-        public async Task<ServiceResult<PenaltyResponse>> GetPenaltyByIdAsync(long id)
+        public async Task<ServiceResult<PenaltyResponse>> GetPenaltyByIdAsync(string memberIdNumber)
         {
             var penalty = await _context.Penalties!
                 .Include(p => p.Member)
-                .Select(p => new PenaltyResponse()
-                {
-                    PenaltyId = p.PenaltyId,
-                    DailyFee = p.DailyFee,
-                    TotalFee = p.TotalFee,
-                    StartDate = p.StartDate,
-                    EndDate = p.EndDate,
-                    OverdueDays = p.OverdueDays,
-                    Type = p.Type,
-                    MemberName = p.Member!.ApplicationUser!.Name,
-                })
-                .FirstOrDefaultAsync(p => p.PenaltyId == id);
+                    .ThenInclude(a => a!.ApplicationUser)
+                .FirstOrDefaultAsync(p => p.Member!.ApplicationUser!.IdNumber == memberIdNumber);
 
+            PenaltyResponse response = new PenaltyResponse()
+            {
+                PenaltyId = penalty!.PenaltyId,
+                DailyFee = penalty.DailyFee,
+                TotalFee = penalty.TotalFee,
+                StartDate = penalty.StartDate,
+                EndDate = penalty.EndDate,
+                OverdueDays = penalty.OverdueDays,
+                Type = penalty.Type,
+                MemberName = penalty.Member!.ApplicationUser!.Name,
+            };
+               
             if (penalty == null)
             {
                 return ServiceResult<PenaltyResponse>.FailureResult("Penalty not found");
             }
 
-            return ServiceResult<PenaltyResponse>.SuccessResult(penalty);
+            return ServiceResult<PenaltyResponse>.SuccessResult(response);
         }
 
         /// <summary>

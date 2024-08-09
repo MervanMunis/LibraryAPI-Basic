@@ -22,7 +22,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of all wanted books.</returns>
         [HttpGet] // GET: api/WantedBooks
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<WantedBookResponse>>> GetWantedBooks()
         {
             var result = await _wantedBookService.GetAllWantedBooksAsync();
@@ -41,7 +41,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the wanted book to retrieve.</param>
         /// <returns>The requested wanted book.</returns>        
         [HttpGet("{id}")] // GET: api/WantedBooks/5
-        [Authorize(Roles = "Librarian, Member")]
+        [Authorize(Roles = "Member,Librarian,HeadOfLibrary")]
         public async Task<ActionResult<WantedBookResponse>> GetWantedBook(int id)
         {
             var result = await _wantedBookService.GetWantedBookByIdAsync(id);
@@ -79,7 +79,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the wanted book to delete.</param>
         /// <returns>A success message if the wanted book is deleted successfully.</returns>
         [HttpDelete("{id}")] // DELETE: api/WantedBooks/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,HeadOfLibrary")]
         public async Task<ActionResult<string>> DeleteWantedBook(int id)
         {
             var result = await _wantedBookService.DeleteWantedBookAsync(id);

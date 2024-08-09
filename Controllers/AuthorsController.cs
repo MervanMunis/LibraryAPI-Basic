@@ -29,7 +29,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of all authors.</returns>
         [HttpGet] // GET: api/Authors
-        [Authorize(Roles = "Member, Librarian")]
+        [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
         public async Task<ActionResult<IEnumerable<AuthorResoponse>>> GetAuthors()
         {
             var result = await _authorService.GetAllAuthorsAsync();
@@ -47,7 +47,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of active authors.</returns>
         [HttpGet("active")] // GET: api/Authors/active
-        [Authorize(Roles = "Member, Librarian")]
+        [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
         public async Task<IActionResult> GetAllActiveAuthors()
         {
             var result = await _authorService.GetAllActiveAuthorsAsync();
@@ -64,7 +64,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of inactive authors.</returns>
         [HttpGet("inactive")] // GET: api/Authors/inactive
-        [Authorize(Roles = "Member, Librarian")]
+        [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
         public async Task<IActionResult> GetAllInactiveAuthors()
         {
             var result = await _authorService.GetAllInActiveAuthorsAsync();
@@ -80,7 +80,7 @@ namespace LibraryAPI.Controllers
         /// </summary>
         /// <returns>A list of inactive authors.</returns>
         [HttpGet("banned")] // GET: api/Authors/inactive
-        [Authorize(Roles = "Member, Librarian")]
+        [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
         public async Task<IActionResult> GetAllBannedAuthors()
         {
             var result = await _authorService.GetAllBannedAuthorsAsync();
@@ -97,7 +97,7 @@ namespace LibraryAPI.Controllers
         /// <param name="id">The ID of the author to retrieve.</param>
         /// <returns>The author details if found.</returns>
         [HttpGet("{id}")] // GET: api/Authors/5
-        [Authorize(Roles = "Member, Librarian")]
+        [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
         public async Task<ActionResult<AuthorResoponse>> GetAuthor(long id)
         {
             var result = await _authorService.GetAuthorByIdAsync(id);
@@ -116,7 +116,7 @@ namespace LibraryAPI.Controllers
         /// <param name="authorRequest">The author data to add.</param>
         /// <returns>A success message if the author is added successfully.</returns>
         [HttpPost] // POST: api/Authors
-        [Authorize(Roles = "Librarian")] 
+        [Authorize(Roles = "Librarian, HeadOfLibrary")] 
         public async Task<ActionResult<string>> PostAuthor([FromBody] AuthorRequest authorRequest)
         {
             var result = await _authorService.AddAuthorAsync(authorRequest);
@@ -136,7 +136,7 @@ namespace LibraryAPI.Controllers
         /// <param name="authorRequest">The new author data.</param>
         /// <returns>A success message if the author is updated successfully.</returns>
         [HttpPut("{id}")] // PUT: api/Authors/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> PutAuthor(long id, [FromBody] AuthorRequest authorRequest)
         {
             var result = await _authorService.UpdateAuthorAsync(id, authorRequest);
@@ -156,7 +156,7 @@ namespace LibraryAPI.Controllers
         /// <param name="status">The new status of the author.</param>
         /// <returns>A success message if the author's status is updated successfully.</returns>
         [HttpPatch("{id}/status/inactive")] // PATCH: api/Authors/5
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> InActiveAuthor(long id)
         {
             var result = await _authorService.SetAuthorStatusAsync(id, Status.InActive.ToString());
@@ -176,7 +176,7 @@ namespace LibraryAPI.Controllers
         /// <param name="status">The new status of the author.</param>
         /// <returns>A success message if the author's status is updated successfully.</returns>
         [HttpPatch("{id}/status/banned")] // PATCH: api/Authors/5/banned
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<IActionResult> BannedAuthor(long id)
         {
             var result = await _authorService.SetAuthorStatusAsync(id, Status.Banned.ToString());
@@ -196,7 +196,7 @@ namespace LibraryAPI.Controllers
         /// <param name="status">The new status of the author.</param>
         /// <returns>A success message if the author's status is updated successfully.</returns>
         [HttpPatch("{id}/status/active")] // PATCH: api/Authors/5/status/active
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> SetAuthorActiveStatus(long id)
         {
             var result = await _authorService.SetAuthorStatusAsync(id, Status.Active.ToString());
@@ -214,7 +214,7 @@ namespace LibraryAPI.Controllers
         /// <param name="image">The new image file.</param>
         /// <returns>A success message if the author's image is updated successfully.</returns>
         [HttpPatch("{id}/image")] // PATCH: api/Authors/5/image
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
         public async Task<ActionResult<string>> UpdateAuthorImage(long id, IFormFile image)
         {
             if (image == null)
@@ -238,7 +238,7 @@ namespace LibraryAPI.Controllers
         /// <param name="authorId">The ID of the author.</param>
         /// <returns>The image as a byte array.</returns>
         [HttpGet("{authorId}/image")]
-        [Authorize(Roles = "Member, Librarian")]
+        [Authorize(Roles = "Member, Librarian, HeadOfLibrary")]
         public async Task<IActionResult> GetAuthorImage(long authorId)
         {
             var result = await _authorService.GetAuthorImageAsync(authorId);
