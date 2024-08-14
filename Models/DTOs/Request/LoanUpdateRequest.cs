@@ -1,9 +1,15 @@
-﻿namespace LibraryAPI.Models.DTOs.Request
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace LibraryAPI.Models.DTOs.Request
 {
     public class LoanUpdateRequest
     {
-        public long LoanId { get; set; }
+        [Required]
+        public int LoanId { get; set; }
 
-        public string LoanStatus { get; set; } = string.Empty;
+        [Required]
+        public string EmployeeId { get; set; } = string.Empty;
+
+        public string? LoanStatus { get; set; }
     }
 }

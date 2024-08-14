@@ -72,6 +72,20 @@ namespace LibraryAPI.Controllers
             return Ok(result.Data);
         }
 
+        [HttpGet("{loanId}/transactions")] // GET: api/Loans/{loanId}/transactions
+        [Authorize(Roles = "Librarian, HeadOfLibrary")]
+        public async Task<ActionResult<IEnumerable<LoanTransactionResponse>>> GetLoanTransactionByLoanId(int loanId)
+        {
+            var result = await _loanService.GetLoanTransactionByLoanId(loanId);
+
+            if (!result.Success)
+            {
+                return NotFound(result.ErrorMessage);
+            }
+
+            return Ok(result.Data);
+        }
+
         /// <summary>
         /// Creates a new loan.
         /// </summary>

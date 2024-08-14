@@ -109,9 +109,8 @@ namespace LibraryAPI.Services.impl
         public async Task<ServiceResult<BookResponse>> GetBookByIdAsync(long id)
         {
             var book = await _context.Books!
-                .Where(book => book.BookStatus == Status.Active.ToString())
+                .Where(b => b.BookId == id && b.BookStatus == Status.Active.ToString())
                 .Include(b => b.Publisher)
-                .Include(b => b.Location)
                 .Include(b => b.BookSubCategories)!
                     .ThenInclude(bsc => bsc.SubCategory)
                 .Include(b => b.AuthorBooks)!
@@ -136,7 +135,7 @@ namespace LibraryAPI.Services.impl
                     LanguageNames = b.BookLanguages!.Select(bl => bl.Language!.Name).ToList(),
                     AuthorNames = b.AuthorBooks!.Select(ab => ab.Author!.FullName).ToList(),
                 })
-                .FirstOrDefaultAsync(b => b.BookId == id);
+                .FirstOrDefaultAsync();
 
             if (book == null || book.BookStatus != Status.Active.ToString())
             {
@@ -158,20 +157,6 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<string>.FailureResult("The book with the specified ISBN is already in the database!");
             }
 
-            // Check if the location already has 50 books
-            if (bookRequest.LocationId.HasValue)
-            {
-                var booksInLocation = await _context.BookCopies!
-                    .Where(bookCopy => bookCopy.Book!.LocationId == bookRequest.LocationId.Value && 
-                                       bookCopy.BookCopyStatus == Status.Active.ToString())
-                    .CountAsync();
-
-                if (booksInLocation >= 50)
-                {
-                    return ServiceResult<string>.FailureResult("The shelf already has 50 books. No more books can be added to this shelf.");
-                }
-            }
-
             var newBook = new Book
             {
                 ISBN = bookRequest.ISBN,
@@ -182,7 +167,6 @@ namespace LibraryAPI.Services.impl
                 PrintCount = bookRequest.PrintCount,
                 BookStatus = Status.Active.ToString(),
                 PublisherId = bookRequest.PublisherId,
-                LocationId = bookRequest.LocationId
             };
 
             newBook = CrossTable(bookRequest, newBook);
@@ -197,11 +181,76 @@ namespace LibraryAPI.Services.impl
             });
 
             await _context.BookCopies!.AddRangeAsync(bookCopies);
-
             await _context.SaveChangesAsync();
 
             return ServiceResult<string>.SuccessMessageResult("Book successfully created!");
         }
+
+        public async Task<ServiceResult<string>> AddLocationOfBookCopies(List<BookCopyRequest> bookCopyRequests)
+        {
+            var bookCopyIds = bookCopyRequests.Select(bcr => bcr.BookCopyId).ToList();
+
+            var locationIds = bookCopyRequests.Select(bcr => bcr.LocationId)
+                .Where(id => id.HasValue).Select(id => id!.Value)
+                .Distinct()
+                .ToList();
+
+            // Fetch all book copies in one query
+            var bookCopies = await _context.BookCopies!
+                .Where(bc => bookCopyIds.Contains(bc.BookCopyId))
+                .ToListAsync();
+
+            // Fetch all locations in one query
+            var locations = await _context.Locations!
+                .Where(l => locationIds.Contains(l.LocationId))
+                .ToDictionaryAsync(l => l.LocationId);
+
+            // Dictionary to track the number of books per location
+            var booksInLocation = await _context.BookCopies!
+                .Where(bc => locationIds.Contains(bc.LocationId!.Value) && bc.BookCopyStatus == Status.Active.ToString())
+                .GroupBy(bc => bc.LocationId)
+                .ToDictionaryAsync(g => g.Key!.Value, g => g.Count());
+
+            foreach (var bookCopyRequest in bookCopyRequests)
+            {
+                var bookCopy = bookCopies.FirstOrDefault(bc => bc.BookCopyId == bookCopyRequest.BookCopyId);
+                if (bookCopy == null)
+                {
+                    return ServiceResult<string>.FailureResult($"The book copy with ID {bookCopyRequest.BookCopyId} was not found!");
+                }
+
+                if (!locations.ContainsKey(bookCopyRequest.LocationId!.Value))
+                {
+                    return ServiceResult<string>.FailureResult($"The location with ID {bookCopyRequest.LocationId} does not exist!");
+                }
+
+                if (!booksInLocation.TryGetValue(bookCopyRequest.LocationId.Value, out int currentCount))
+                {
+                    currentCount = 0;
+                }
+
+                if (currentCount >= 50)
+                {
+                    return ServiceResult<string>.FailureResult($"The shelf at location ID {bookCopyRequest.LocationId} already has 50 books. No more books can be added.");
+                }
+
+                // Update the book copy's location
+                bookCopy.LocationId = bookCopyRequest.LocationId;
+                booksInLocation[bookCopyRequest.LocationId.Value] = currentCount + 1;
+            }
+
+            // Save changes in bulk
+            try
+            {
+                await _context.SaveChangesAsync();
+                return ServiceResult<string>.SuccessResult("All the book copies were placed on the specified locations successfully.");
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return ServiceResult<string>.FailureResult($"A concurrency error occurred: {ex.Message}");
+            }
+        }
+
 
         /// <summary>
         /// Updates the details of an existing book.
@@ -233,7 +282,6 @@ namespace LibraryAPI.Services.impl
             book.Description = bookRequest.Description;
             book.PrintCount = bookRequest.PrintCount;
             book.PublisherId = bookRequest.PublisherId;
-            book.LocationId = bookRequest.LocationId;
 
             _context.Update(book).State = EntityState.Modified;
 
@@ -299,15 +347,10 @@ namespace LibraryAPI.Services.impl
             book.BookStatus = status;
             _context.Update(book).State = EntityState.Modified;
 
-            var bookCopies = await _context.BookCopies!
+            // Batch update book copies
+            await _context.BookCopies!
                 .Where(bc => bc.BookId == id)
-                .ToListAsync();
-
-            foreach (var bookCopy in bookCopies)
-            {
-                bookCopy.BookCopyStatus = status;
-                _context.Update(bookCopy).State = EntityState.Modified;
-            }
+                .ForEachAsync(bc => bc.BookCopyStatus = status);
 
             try
             {
@@ -394,12 +437,6 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<bool>.FailureResult("Rating must be between 0 and 5!");
             }
 
-            var book = await _context.Books!.FindAsync(id);
-            if (book == null)
-            {
-                return ServiceResult<bool>.FailureResult("Book not found");
-            }
-
             var existingRating = await _context.BookRatings!
                 .FirstOrDefaultAsync(br => br.BookId == id && br.MemberId == memberId);
 
@@ -407,7 +444,6 @@ namespace LibraryAPI.Services.impl
             {
                 existingRating.GivenRating = rating;
                 _context.Update(existingRating).State = EntityState.Modified;
-                return ServiceResult<bool>.SuccessMessageResult("The book' rating is updated successfully.");
             }
             else
             {
@@ -425,10 +461,17 @@ namespace LibraryAPI.Services.impl
                 await _context.SaveChangesAsync();
 
                 // Recalculate the average rating for the book
-                var ratings = await _context.BookRatings!.Where(br => br.BookId == id).ToListAsync();
-                book.Rating = ratings.Average(br => br.GivenRating);
-                _context.Update(book).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                var averageRating = await _context.BookRatings!
+                    .Where(br => br.BookId == id)
+                    .AverageAsync(br => br.GivenRating);
+
+                var book = await _context.Books!.FindAsync(id);
+                if (book != null)
+                {
+                    book.Rating = averageRating;
+                    _context.Update(book).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
 
                 return ServiceResult<bool>.SuccessMessageResult("The rating is given successfully.");
             }
@@ -570,7 +613,6 @@ namespace LibraryAPI.Services.impl
             var books = await _context.Books!
                 .Where(filterPredicate)
                 .Include(book => book.Publisher)
-                .Include(book => book.Location)
                 .Include(book => book.BookSubCategories)!
                     .ThenInclude(bookSubCategory => bookSubCategory.SubCategory)
                 .Include(book => book.AuthorBooks)!
@@ -590,7 +632,6 @@ namespace LibraryAPI.Services.impl
                     CopyCount = (short)b.BookCopies!.Where(bc => bc.BookCopyStatus == Status.Active.ToString()).ToList().Count,
                     BookStatus = b.BookStatus,
                     Rating = b.Rating,
-                    Location = b.Location!.ShelfNumber + "/ " + b.Location.AisleCode + "/ " + b.Location.SectionCode,
                     PublisherName = b.Publisher!.Name,
                     SubCategoryNames = b.BookSubCategories!.Select(sb => sb.SubCategory!.Name).ToList(),
                     CategoryName = b.BookSubCategories!.Select(sb => sb.SubCategory!.Category!.Name).First(),
@@ -618,6 +659,7 @@ namespace LibraryAPI.Services.impl
                     ISBN = b.Book!.ISBN,
                     Title = b.Book.Title,
                     BookCopyId = b.BookCopyId,
+                    LocationId = b.LocationId,
                     BookCopyStatus = b.BookCopyStatus
                 })
                 .ToListAsync();

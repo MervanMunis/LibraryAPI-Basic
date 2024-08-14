@@ -182,6 +182,25 @@ public class BooksController : ControllerBase
         return Ok("The book is added successfully.");
     }
 
+    [HttpPost("bookCopies/locations")] // POST: api/Books/bookCopies/locations
+    [Authorize(Roles = "Librarian, HeadOfLibrary")]
+    public async Task<ActionResult<string>> AddLocationOfBookCopies([FromBody] List<BookCopyRequest> bookCopyRequests)
+    {
+        if (bookCopyRequests == null || !bookCopyRequests.Any())
+        {
+            return BadRequest("The list of book copy requests cannot be null or empty.");
+        }
+
+        var result = await _bookService.AddLocationOfBookCopies(bookCopyRequests);
+
+        if (!result.Success)
+        {
+            return BadRequest(result.ErrorMessage);
+        }
+
+        return Ok(result.SuccessMessage);
+    }
+
     /// <summary>
     /// Updates an existing book.
     /// </summary>

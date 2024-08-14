@@ -19,6 +19,12 @@ namespace LibraryAPI.Models.Entities
         [ForeignKey(nameof(BookId))]
         public Book? Book { get; set; }
 
+        public int? LocationId { get; set; }
+
+        [JsonIgnore]
+        [ForeignKey(nameof(LocationId))]
+        public Location? Location { get; set; }
+
         [JsonIgnore]
         public ICollection<Loan>? Loans { get; set; }
     }

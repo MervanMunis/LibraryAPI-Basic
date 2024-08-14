@@ -33,6 +33,9 @@ namespace LibraryAPI.Models.Entities
 
         [JsonIgnore]
         public ICollection<Loan>? Loans { get; set; }
+
+        [JsonIgnore]
+        public ICollection<LoanTransaction>? LoanTransactions { get; set; }
     }
 }
 

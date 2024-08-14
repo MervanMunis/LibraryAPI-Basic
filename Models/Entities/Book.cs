@@ -55,12 +55,6 @@ namespace LibraryAPI.Models.Entities
         [ForeignKey(nameof(PublisherId))]
         public Publisher? Publisher { get; set; }
 
-        public int? LocationId { get; set; }
-
-        [JsonIgnore]
-        [ForeignKey(nameof(LocationId))]
-        public Location? Location { get; set; }
-
         [JsonIgnore]
         public ICollection<BookSubCategory>? BookSubCategories { get; set; }
 

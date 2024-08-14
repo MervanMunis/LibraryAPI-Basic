@@ -51,6 +51,9 @@ public class Loan
     [JsonIgnore]
     public BookCopy? BookCopy { get; set; }
 
+    [JsonIgnore]
+    public ICollection<LoanTransaction>? LoanTransactions { get; set; }
+
     public Loan()
     {
         // Default constructor for EF

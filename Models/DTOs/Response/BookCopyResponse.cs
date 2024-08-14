@@ -7,6 +7,8 @@ namespace LibraryAPI.Models.DTOs.Response
 
         public long BookCopyId { get; set; }
 
+        public int? LocationId { get; set; }
+
         public string ISBN { get; set; } = string.Empty;
 
         public string Title { get; set; } = string.Empty;

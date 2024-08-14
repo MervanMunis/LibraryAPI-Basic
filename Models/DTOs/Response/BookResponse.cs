@@ -23,8 +23,6 @@ namespace LibraryAPI.Models.DTOs.Response
 
         public string? PublisherName { get; set; }
 
-        public string? Location { get; set; }
-
         public float? Rating { get; set; }
 
         public List<string>? SubCategoryNames { get; set; }

@@ -55,6 +55,8 @@ namespace LibraryAPI.Data
 
         public DbSet<MemberAddress>? MemberAddresses { get; set; }
 
+        public DbSet<LoanTransaction>? LoanTransactions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -119,6 +121,19 @@ namespace LibraryAPI.Data
                 .WithMany(bc => bc.Loans)
                 .HasForeignKey(l => l.BookCopyId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LoanTransaction>()
+                .HasKey(lt => new { lt.LoanId, lt.EmployeeId });
+
+            modelBuilder.Entity<LoanTransaction>()
+                .HasOne(lt => lt.Loan)
+                .WithMany(l => l.LoanTransactions)
+                .HasForeignKey(lt => lt.LoanId);
+
+            modelBuilder.Entity<LoanTransaction>()
+                .HasOne(lt => lt.Employee)
+                .WithMany(e => e.LoanTransactions)
+                .HasForeignKey(lt => lt.EmployeeId);
         }
     }
 }

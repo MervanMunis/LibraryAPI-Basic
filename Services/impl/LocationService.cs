@@ -140,8 +140,8 @@ namespace LibraryAPI.Services.impl
 
             if (status == Status.InActive)
             {
-                var booksInLocation = await _context.Books!
-                    .Where(book => book.LocationId == id && book.BookStatus == Status.Active.ToString())
+                var booksInLocation = await _context.BookCopies!
+                    .Where(book => book.LocationId == id && book.BookCopyStatus == Status.Active.ToString())
                     .ToListAsync();
 
                 if (booksInLocation.Any())
@@ -178,14 +178,15 @@ namespace LibraryAPI.Services.impl
         /// <returns>A list of books in the specified section code.</returns>
         public async Task<ServiceResult<IEnumerable<BookResponse>>> GetBooksBySectionCodeAsync(string sectionCode)
         {
-            var books = await _context.Books!
+            var books = await _context.BookCopies!
+                .Include(b => b.Book)
                 .Include(book => book.Location)
-                .Where(book => book.Location!.SectionCode == sectionCode && book.BookStatus == Status.Active.ToString())
+                .Where(book => book.Location!.SectionCode == sectionCode && book.BookCopyStatus == Status.Active.ToString())
                 .Select(b => new BookResponse()
                 {
                     BookId = b.BookId,
-                    ISBN = b.ISBN,
-                    Title = b.Title
+                    ISBN = b.Book!.ISBN,
+                    Title = b.Book.Title
                 })
                 .ToListAsync();
 
@@ -204,14 +205,15 @@ namespace LibraryAPI.Services.impl
         /// <returns>A list of books in the specified aisle code.</returns>
         public async Task<ServiceResult<IEnumerable<BookResponse>>> GetBooksByAisleCodeAsync(string aisleCode)
         {
-            var books = await _context.Books!
+            var books = await _context.BookCopies!
+                .Include(b => b.Book)
                 .Include(book => book.Location)
-                .Where(book => book.Location!.AisleCode == aisleCode && book.BookStatus == Status.Active.ToString())
+                .Where(book => book.Location!.AisleCode == aisleCode && book.BookCopyStatus == Status.Active.ToString())
                 .Select(b => new BookResponse()
                 {
                     BookId = b.BookId,
-                    ISBN = b.ISBN,
-                    Title = b.Title
+                    ISBN = b.Book!.ISBN,
+                    Title = b.Book.Title
                 })
                 .ToListAsync();
 
@@ -230,14 +232,15 @@ namespace LibraryAPI.Services.impl
         /// <returns>A list of books in the specified shelf number.</returns>
         public async Task<ServiceResult<IEnumerable<BookResponse>>> GetBooksByShelfNumberAsync(string shelfNumber)
         {
-            var books = await _context.Books!
+            var books = await _context.BookCopies!
+                .Include(b => b.Book)
                 .Include(book => book.Location)
-                .Where(book => book.Location!.ShelfNumber == shelfNumber && book.BookStatus == Status.Active.ToString())
+                .Where(book => book.Location!.ShelfNumber == shelfNumber && book.BookCopyStatus == Status.Active.ToString())
                 .Select(b => new BookResponse()
                 {
                     BookId = b.BookId,
-                    ISBN = b.ISBN,
-                    Title = b.Title
+                    ISBN = b.Book!.ISBN,
+                    Title = b.Book.Title
                 })
                 .ToListAsync();
 

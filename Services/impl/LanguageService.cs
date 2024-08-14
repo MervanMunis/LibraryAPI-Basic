@@ -110,6 +110,11 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<bool>.FailureResult("Language not found");
             }
 
+            if (await _context.Languages!.AnyAsync(l => l.Name == languageRequest.Name))
+            {
+                return ServiceResult<bool>.FailureResult("Language with the specified name already exists!");
+            }
+
             existingLanguage.Name = languageRequest.Name;
             existingLanguage.NationalityId = languageRequest.NationalityId;
 

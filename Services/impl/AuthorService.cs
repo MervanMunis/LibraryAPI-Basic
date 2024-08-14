@@ -118,6 +118,16 @@ namespace LibraryAPI.Services.impl
                 return ServiceResult<string>.FailureResult("The author's death year cannot be in the future!");
             }
 
+            bool exist = await _context.Authors!
+                .AnyAsync(a => a.FullName == authorRequest.FullName && 
+                               authorRequest.BirthYear == a.BirthYear && 
+                               a.DeathYear == authorRequest.DeathYear);
+            
+            if (exist) 
+            {
+                return ServiceResult<string>.FailureResult("The Author already exists!");
+            }
+
             // Create a new Author entity
             Author author = new(
                 authorRequest.FullName,
@@ -153,6 +163,16 @@ namespace LibraryAPI.Services.impl
             if (authorRequest.DeathYear.HasValue && authorRequest.DeathYear > DateTime.Now.Year)
             {
                 return ServiceResult<bool>.FailureResult("The author's death year cannot be in the future!");
+            }
+
+            bool exist = await _context.Authors!
+                .AnyAsync(a => a.FullName == authorRequest.FullName &&
+                               authorRequest.BirthYear == a.BirthYear &&
+                               a.DeathYear == authorRequest.DeathYear);
+
+            if (exist)
+            {
+                return ServiceResult<bool>.FailureResult("The Author already exists!");
             }
 
             // Update the author details

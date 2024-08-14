@@ -2,6 +2,7 @@
 using LibraryAPI.Exceptions;
 using LibraryAPI.Models.DTOs.Request;
 using LibraryAPI.Models.DTOs.Response;
+using LibraryAPI.Models.Entities;
 using LibraryAPI.Models.Enums;
 using LibraryAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,11 @@ public class LoanService : ILoanService
         var loans = await _context.Loans!
             .Where(loan => loan.EmployeeId == employeeId)
             .Include(l => l.Member)
-            .Include(l => l.BookCopy).ThenInclude(bc => bc!.Book)
+                .ThenInclude(m => m!.ApplicationUser)
+            .Include(e => e.Employee)
+                .ThenInclude(a => a!.ApplicationUser) 
+            .Include(l => l.BookCopy)
+                .ThenInclude(bc => bc!.Book)
             .Select(l => new LoanResponse()
             {
                 LoanId = l.LoanId,
@@ -57,7 +62,11 @@ public class LoanService : ILoanService
         var loans = await _context.Loans!
             .Where(loan => loan.MemberId == memberId)
             .Include(l => l.Employee)
-            .Include(l => l.BookCopy).ThenInclude(bc => bc!.Book)
+                .ThenInclude(m => m!.ApplicationUser)
+            .Include(e => e.Member)
+                .ThenInclude(a => a!.ApplicationUser)
+            .Include(l => l.BookCopy)
+                .ThenInclude(bc => bc!.Book)
             .Select(l => new LoanResponse()
             {
                 LoanId = l.LoanId,
@@ -125,16 +134,17 @@ public class LoanService : ILoanService
             .FirstOrDefaultAsync(bc => bc.BookCopyId == loanRequest.BookCopyId && bc.BookCopyStatus == Status.Active.ToString());
 
         var member = await _context.Members!
-            .Where(m => m.ApplicationUser!.IdNumber == loanRequest.MemberIdNumber)
-            .FirstOrDefaultAsync();
-
-        var employee = await _context.Employees!
-                .FirstOrDefaultAsync(e => e.EmployeeId == loanRequest.EmployeeId);
+            .Include(m => m.ApplicationUser)
+            .FirstOrDefaultAsync(m => m.ApplicationUser!.IdNumber == loanRequest.MemberIdNumber);
 
         if (member == null)
         {
             return ServiceResult<string>.FailureResult("Member with the given IDNumber does not exist!");
         }
+
+        var employee = await _context.Employees!
+            .Include(e => e.ApplicationUser)
+            .FirstOrDefaultAsync(e => e.EmployeeId == loanRequest.EmployeeId);
 
         if (employee == null)
         {
@@ -182,7 +192,24 @@ public class LoanService : ILoanService
             return ServiceResult<bool>.FailureResult("Loan not found");
         }
 
-        loan.LoanStatus = loanUpdateRequest.LoanStatus;
+        if (loanUpdateRequest.LoanStatus == Status.Returned.ToString() && loan.LoanStatus != Status.Borrowed.ToString())
+        {
+            return ServiceResult<bool>.FailureResult("The loan cannot be marked as returned if the book is not currently borrowed.");
+        }
+
+        if (loanUpdateRequest.LoanStatus != null && loan.LoanStatus != loanUpdateRequest.LoanStatus)
+        {
+            loan.LoanStatus = loanUpdateRequest.LoanStatus;
+
+            LoanTransaction loanTransaction = new LoanTransaction()
+            {
+                LoanId = loanUpdateRequest.LoanId,
+                EmployeeId = loanUpdateRequest.EmployeeId,
+                LoanStatus = loanUpdateRequest.LoanStatus,
+            };
+
+            await _context.LoanTransactions!.AddAsync(loanTransaction);
+        }
 
         _context.Update(loan).State = EntityState.Modified;
 
@@ -202,6 +229,28 @@ public class LoanService : ILoanService
                 throw;
             }
         }
+    }
+
+    public async Task<ServiceResult<IEnumerable<LoanTransactionResponse>>> GetLoanTransactionByLoanId(int loanId)
+    {
+        var loanTransactions = await _context.LoanTransactions!
+            .Where(lt => lt.LoanId == loanId)
+            .Select(t => new LoanTransactionResponse
+            {
+                EmployeeId = t.EmployeeId,
+                EmployeeName = t.Employee!.ApplicationUser!.Name,
+                LoanId = t.LoanId,
+                LoanUpdate = t.LoanUpdate,
+                LoanStatus = t.LoanStatus
+            })
+            .ToListAsync();
+
+        if (loanTransactions == null || !loanTransactions.Any())
+        {
+            return ServiceResult<IEnumerable<LoanTransactionResponse>>.FailureResult("No loan transactions found for the given loan ID.");
+        }
+
+        return ServiceResult<IEnumerable<LoanTransactionResponse>>.SuccessResult(loanTransactions);
     }
 
     /// <summary>
@@ -228,6 +277,15 @@ public class LoanService : ILoanService
         loan.ReturnDate = DateTime.Now;
         loan.LoanStatus = Status.Returned.ToString();
 
+        LoanTransaction loanTransaction = new LoanTransaction()
+        {
+            LoanId = loan.LoanId,
+            EmployeeId = loan.EmployeeId,
+            LoanStatus = loan.LoanStatus,
+        };
+
+        await _context.LoanTransactions!.AddAsync(loanTransaction);
+
         _context.Update(loan).State = EntityState.Modified;
 
         if (loan.BookCopy != null)
@@ -243,10 +301,11 @@ public class LoanService : ILoanService
             DueDate = loan.DueDate
         };
 
+        await _penaltyService.CalculatePenaltiesAsync(loanReturnRequest);
+
         try
         {
             await _context.SaveChangesAsync();
-            await _penaltyService.CalculatePenaltiesAsync(loanReturnRequest);
             return ServiceResult<bool>.SuccessResult(true);
         }
         catch (DbUpdateConcurrencyException)

@@ -24,6 +24,8 @@ namespace LibraryAPI.Services.Interfaces
 
         Task<ServiceResult<string>> AddBookAsync(BookRequest bookRequest);
 
+        Task<ServiceResult<string>> AddLocationOfBookCopies(List<BookCopyRequest> bookCopyRequests);
+
         Task<ServiceResult<bool>> UpdateBookAsync(long id, BookRequest bookRequest);
 
         Task<ServiceResult<bool>> SetBookStatusAsync(long id, string status);
