@@ -228,6 +228,93 @@ The LibraryAPI provides various endpoints for managing library resources. Here i
 | GET         | /api/authentication/externallogin | Initiates an external login                      |
 | GET         | /api/authentication/externallogincallback | Handles the external login callback      |
 
+### Create a file with name Dockerfile in project folder
+
+[Dockerfile](https://github.com/MervanMunis/LibraryAPI-Dockerized/blob/master/Dockerfile)
+
+```dockerfile
+# Use the official ASP.NET Core runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+# Use the SDK image to build the app
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["LibraryAPI.csproj", "./"]
+RUN dotnet restore "./LibraryAPI.csproj"
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build "LibraryAPI.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "LibraryAPI.csproj" -c Release -o /app/publish
+
+# Use the base image to run the app
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "LibraryAPI.dll"]
+```
+
+### Build the docker image above in project's directory:
+
+```sh
+docker build -t libraryapi:latest .
+```
+
+### Create a file with name docker-compose.yml in a folder
+[docker-compose.yml](https://github.com/MervanMunis/LibraryAPI-Dockerized/blob/master/docker-compose.yml)
+
+```yml
+version: '3.4'
+
+services:
+  libraryapi:
+    depends_on:
+      - sqlserver
+    image: mervanmunis/libraryapi:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__LibraryAPIContext=Server=sqlserver;Database=LibraryAPI;User=sa;Password=Master123!;
+      - Jwt__Key=b9T9j54dI4E9kR2lA1V3cG7xN0Q2zY8uJ5R7mS6hP4L8vX9qK2
+      - Jwt__Issuer=LibraryAPI
+      - Jwt__Audience=LibraryAPIUsers
+    networks:
+      - library-network
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "Master123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - library-network
+
+networks:
+  library-network:
+    driver: bridge
+```
+
+### Run the Docker Compose file from the file directory if you want to build the project into containers after running the Dockerfile:
+
+```sh
+docker-compose build
+```
+
+### Run the Docker Compose file from the any file directory to run the project (The docker containers should be in Docker Repository):
+
+```sh
+docker-compose up
+```
+
 ## Testing the Project
 To test the project, follow these steps:
 
